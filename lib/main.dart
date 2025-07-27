@@ -1,4 +1,6 @@
-import 'package:flutter/material.dart';
+import'package:flutter/material.dart';
+import'package:simple_todo/todo.dart';
+import 'package:simple_todo/todoscreen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -30,8 +32,16 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: TodoScreen(
+        todos: List.generate(
+          20,
+          (index) => Todo(
+            'Hey I am todo $index',
+            'This is a full description of todo $index',
+            false,
+          ),
+        ),
+      ),
     );
-  }
+   }
 }
-
