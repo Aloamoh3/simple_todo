@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:simple_todo/todo.dart';
 import 'package:simple_todo/detailscreen.dart';
-import 'package:simple_todo/addtodo.dart'; 
+import 'package:simple_todo/addtodo.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class TodoScreen extends StatefulWidget {
   const TodoScreen({super.key});
@@ -12,6 +14,37 @@ class TodoScreen extends StatefulWidget {
 
 class _TodoScreenState extends State<TodoScreen> {
   final List<Todo> todos = [];
+  
+  List<String> savedTodo = List.empty();
+
+  @override
+  void initState() {
+    deserializeTodo();
+    super.initState();
+  }
+
+Future<void> serializeTODO() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  savedTodo.clear();
+  for (int i = 0; i < todos.length; i++) {
+    String todo = json.encode(todos[i]);
+    savedTodo.add(todo);
+  }
+    await prefs.setStringList("todo", savedTodo);
+  }
+
+
+Future<void> deserializeTodo() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  var fromMem = prefs.getStringList("todo");
+ if (fromMem != null) {
+  todos.clear();
+  savedTodo = fromMem;
+  for (int i = 0; i < savedTodo.length; i++) {
+    todos.add(Todo.fromJson(json.decode(savedTodo[i])));
+  }
+ }
+}
 
   @override
   Widget build(BuildContext context) {
