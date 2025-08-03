@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:simple_todo/todo.dart';
+import 'package:uuid/uuid.dart';
+
+var uuid = Uuid();
+
+
 
 class AddTodo extends StatefulWidget {
   const AddTodo({super.key});
@@ -29,8 +34,8 @@ class _AddTodoState extends State<AddTodo> {
                 setState(() {
                   title = value;
                 });
-              },
-            ),
+                },
+               ),
             const SizedBox(height: 12),
             TextField(
               decoration: InputDecoration(
@@ -57,7 +62,7 @@ class _AddTodoState extends State<AddTodo> {
                       ),
                     );
                 } else {
-                  Todo todo = Todo(title, description, false);
+                  Todo todo = createTodo(title, description);
                   Navigator.pop(context, todo);
                 }
               },
@@ -68,4 +73,14 @@ class _AddTodoState extends State<AddTodo> {
       ),
     );
   }
+}
+
+Todo createTodo(String title, String description) {
+  String id = uuid.v1();
+  return Todo(
+   title: title,
+   description: description,
+   done: false,
+   id: id
+ );
 }
