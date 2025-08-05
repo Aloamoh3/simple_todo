@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:simple_todo/helper.dart';
 import 'package:simple_todo/todo.dart';
 
 class EditTodo extends StatefulWidget {
@@ -15,14 +16,23 @@ class _EditTodoState extends State<EditTodo> {
   TextEditingController descEdit = TextEditingController();
 
   late Todo todo;
+  
+  List<Todo> todos = [];
+  
+  List<String> savedTodo = <String>[];
 
   @override
   void initState() {
+    _getTodos();
     super.initState();
     todo = ModalRoute.of(context)!.settings.arguments as Todo;
     titleEdit.text = todo.title;
     descEdit.text = todo.description;
   }
+Future<void> _getTodos() async {
+   todos = await deserializeTodo(savedTodo, todos);
+}
+
 
     @override
     Widget build(BuildContext context) {
@@ -73,6 +83,7 @@ class _EditTodoState extends State<EditTodo> {
                     );
                 } else {
                   Todo todo = editTodo(title, description);
+                  serializeTODO(savedTodo, todos);
                   Navigator.pop(context, todo);
                 }
               },
@@ -85,6 +96,19 @@ class _EditTodoState extends State<EditTodo> {
   }
 
   Todo editTodo(String title, String description) {
+    for(int i = 0; i < todos.length; i++) {
+      if(todos[i].id == todo.id) {
+        
+        todo = Todo(
+          title: title,
+          description: description
+          done: false,
+          id: todo.id,
+        );
+      todos[i] = todo;
+      break;
+      }
+    }
   return Todo(
     title: title,
     description: description,
