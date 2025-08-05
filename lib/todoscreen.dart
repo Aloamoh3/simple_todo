@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:simple_todo/helper.dart';
 import 'package:simple_todo/todo.dart';
 import 'package:simple_todo/detailscreen.dart';
 import 'package:simple_todo/addtodo.dart';
@@ -13,38 +14,51 @@ class TodoScreen extends StatefulWidget {
 }
 
 class _TodoScreenState extends State<TodoScreen> {
-  final List<Todo> todos = [];
+  List<Todo> todos = [];
   
-  List<String> savedTodo = List.empty();
+  List<String> savedTodo = <String>[];
 
   @override
   void initState() {
-    deserializeTodo();
+     _getTodos();
     super.initState();
   }
-
-Future<void> serializeTODO() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  savedTodo.clear();
-  for (int i = 0; i < todos.length; i++) {
-    String todo = json.encode(todos[i]);
-    savedTodo.add(todo);
-  }
-    await prefs.setStringList("todo", savedTodo);
-  }
-
-
-Future<void> deserializeTodo() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  var fromMem = prefs.getStringList("todo");
- if (fromMem != null) {
-  todos.clear();
-  savedTodo = fromMem;
-  for (int i = 0; i < savedTodo.length; i++) {
-    todos.add(Todo.fromJson(json.decode(savedTodo[i])));
-  }
- }
+Future<void> _getTodos() async {
+  var todo = await deserializeTodo(savedTodo, todos);
+    setState(() {
+      todos = todo;
+    });
 }
+
+// Future<void> serializeTODO() async {
+//   SharedPreferences prefs = await SharedPreferences.getInstance();
+//   savedTodo.clear();
+//   for (int i = 0; i < todos.length; i++) {
+//     String todo = json.encode(todos[i]);
+//     print(todo);
+//     savedTodo.add(todo);
+//   }
+//     await prefs.setStringList("todo", savedTodo);
+//   }
+
+
+// Future<void> deserializeTodo() async {
+//   SharedPreferences prefs = await SharedPreferences.getInstance();
+//   var fromMem = prefs.getStringList("todo");
+//  if (fromMem != null) {
+//   print(fromMem.length);
+//   todos.clear();
+//   savedTodo = fromMem;
+//   for (int i = 0; i < savedTodo.length; i++) {
+//     print(savedTodo[i]);
+//     Todo todo = Todo.fromJson(json.decode(savedTodo[i]));
+//     setState(() {
+//       todos.add(todo);
+      
+//     });
+//   }
+//  }
+// }
 
   @override
   Widget build(BuildContext context) {
@@ -79,13 +93,7 @@ Future<void> deserializeTodo() async {
                 return ListTile(
                   title: Text(todos[index].title),
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const DetailScreen(),
-                        settings: RouteSettings(arguments: todos[index]),
-                      ),
-                    );
+                    _navigateToDetails( context, todos[index]);
                   },
                 );
               },
@@ -99,15 +107,33 @@ Future<void> deserializeTodo() async {
     );
   }
 
+  Future<void> _navigateToDetails(BuildContext context, Todo todoDetail) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+      builder: (context) => const DetailScreen(),
+      settings: RouteSettings(arguments: todoDetail),
+     ),
+    );
+       if (result != null && result is Todo) {
+        await _getTodos();
+      setState(() {
+      });
+     }
+    }
+
   Future<void> _navigateAndDisplayAddTodo(BuildContext context) async {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const AddTodo()),
     );
 
+    if (!context.mounted) return;
+
     if (result != null && result is Todo) {
       setState(() {
         todos.add(result);
+        serializeTODO(savedTodo, todos);
       });
     }
   }
