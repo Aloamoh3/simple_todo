@@ -22,7 +22,13 @@ void initState() {
   @override
   Widget build(BuildContext context) {
     
-    return Scaffold(appBar: AppBar(title: Text(todo.title),),
+    return Scaffold(
+      appBar: AppBar(title: Text(todo.title), leading: IconButton(onPressed: (){
+      Navigator.pop(context, todo);
+      },
+    icon: Icon(Icons.arrow_back),
+    ),
+   ), 
     body: Padding(
       padding: const EdgeInsets.all(16),
        child: Column(
@@ -30,14 +36,19 @@ void initState() {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(todo.description),
-        ElevatedButton(onPressed: () {
-          Navigator.push(
+        ElevatedButton(onPressed: () async {
+          final result = await Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => const EditTodo(),
                         settings: RouteSettings(arguments: todo),
                       ),
                     );
+
+                    if(result != null && result is Todo) {
+                      if(!context.mounted) return;
+                      Navigator.pop(context, result);
+                    }
         }, child: Text("Edit Todo"),
             ),
        ]),
